@@ -1,0 +1,50 @@
+spring:
+  application.name: urlshortener
+  profiles.active: dev
+
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      database: 0
+
+  jackson:
+    time-zone: "Asia/Seoul"
+    serialization:
+      write-dates-as-timestamps: true
+
+
+server:
+  port: 8080
+  forward-headers-strategy: native
+
+  netty:
+    connection-timeout: 30
+    max-keep-alive-requests: 50
+
+
+app_props:
+  shortener-url: https://dii.im
+  home-url: https://www.dii.im
+
+
+logging:
+  level:
+    root: INFO
+    org.springframework: INFO
+    net.rubyworks.urlshortener: DEBUG
+
+
+
+---
+spring:
+  config.activate.on-profile: dev
+
+
+
+
+---
+spring:
+  config.activate.on-profile: product
+  
+
