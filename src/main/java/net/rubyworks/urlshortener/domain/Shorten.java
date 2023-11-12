@@ -39,7 +39,7 @@ public class Shorten implements Serializable {
     private boolean fixed;
 
     public String getBan() {
-        return "https://dii.im/api/delete/" + id;
+        return "http://localhost:8080/api/delete/" + id;
     }
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")

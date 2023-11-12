@@ -24,8 +24,8 @@ server:
 
 
 app_props:
-  shortener-url: https://dii.im
-  home-url: https://www.dii.im
+  shortener-url: http://localhost:8080
+  home-url: http://localhost:8080
 
 
 logging:
