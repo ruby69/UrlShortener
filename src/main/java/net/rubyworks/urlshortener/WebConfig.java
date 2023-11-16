@@ -11,10 +11,11 @@ import org.springframework.http.MediaType;
 import org.springframework.http.codec.ServerCodecConfigurer;
 import org.springframework.web.reactive.function.server.RouterFunction;
 
+import net.rubyworks.urlshortener.command.CommandHandler;
+import net.rubyworks.urlshortener.query.QueryHandler;
 import net.rubyworks.urlshortener.support.ErrAttr;
 import net.rubyworks.urlshortener.support.ErrHandler;
 import net.rubyworks.urlshortener.support.WebfluxTraceFilter;
-import net.rubyworks.urlshortener.web.ShortenHandler;
 
 @Configuration
 public class WebConfig {
@@ -36,14 +37,19 @@ public class WebConfig {
     }
 
     @Bean
-    RouterFunction<?> router(ShortenHandler handler) {
+    RouterFunction<?> queryRouter(QueryHandler handler) {
+        return route()
+                .GET("/api/list/all", handler::byAll)
+                .GET("/api/list/{duration}", handler::byDuration)
+                .build();
+    }
+
+    @Bean
+    RouterFunction<?> commandRouter(CommandHandler handler) {
         return route()
                 .GET("/{id}", handler::id)
                 .POST("/q", accept(MediaType.APPLICATION_JSON), handler::save)
                 .POST("/bulk", accept(MediaType.APPLICATION_JSON), handler::bulk)
-
-                .GET("/api/list/all", handler::byAll)
-                .GET("/api/list/{duration}", handler::byDuration)
                 .GET("/api/delete/{id}", handler::delete)
 
                 .build();

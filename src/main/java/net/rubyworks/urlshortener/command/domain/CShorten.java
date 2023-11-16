@@ -1,9 +1,8 @@
-package net.rubyworks.urlshortener.domain;
+package net.rubyworks.urlshortener.command.domain;
 
 import java.io.Serializable;
 import java.net.URI;
 import java.time.Instant;
-import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -13,7 +12,6 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.redis.core.RedisHash;
 import org.springframework.data.redis.core.TimeToLive;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
@@ -28,8 +26,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @RedisHash("shorten")
 @JsonInclude(Include.NON_NULL)
-public class Shorten implements Serializable {
-    private static final long serialVersionUID = -82660867274461708L;
+public class CShorten implements Serializable {
+    private static final long serialVersionUID = -4090344569128658566L;
 
     @Id private String id;
     private String url;
@@ -37,15 +35,6 @@ public class Shorten implements Serializable {
     @TimeToLive(unit = TimeUnit.SECONDS) private long ttl;
     private long modifiedAt;
     private boolean fixed;
-
-    public String getBan() {
-        return "http://localhost:8080/api/delete/" + id;
-    }
-
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    public Date getModifiedTime() {
-        return new Date(modifiedAt);
-    }
 
     public URI uri() {
         return URI.create(url);
@@ -55,11 +44,11 @@ public class Shorten implements Serializable {
         return Map.of("to", base + "/" + id);
     }
 
-    public static Shorten of(String id, String url) {
+    public static CShorten of(String id, String url) {
         return of(id, url, -1, -1, true);
     }
 
-    public static Shorten of(String id, String url, long count, long ttl, boolean fixed) {
+    public static CShorten of(String id, String url, long count, long ttl, boolean fixed) {
         return builder()
                 .id(id)
                 .url(url)
@@ -70,11 +59,11 @@ public class Shorten implements Serializable {
                 .build();
     }
 
-    public static Shorten copy(Shorten shorten, long count) {
+    public static CShorten copy(CShorten shorten, long count) {
         return of(shorten.id, shorten.url, count, shorten.ttl, shorten.fixed);
     }
 
-    public static Shorten copy(Shorten shorten) {
+    public static CShorten copy(CShorten shorten) {
         return of(shorten.id, shorten.url, shorten.count, shorten.ttl, shorten.fixed);
     }
 

@@ -1,4 +1,4 @@
-package net.rubyworks.urlshortener.web;
+package net.rubyworks.urlshortener.command;
 
 import static net.rubyworks.urlshortener.support.Responses.empty;
 import static net.rubyworks.urlshortener.support.Responses.json;
@@ -17,16 +17,16 @@ import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
 
 import lombok.RequiredArgsConstructor;
-import net.rubyworks.urlshortener.domain.Shorten;
+import net.rubyworks.urlshortener.command.domain.CShorten;
 import reactor.core.publisher.Mono;
 
 @RequiredArgsConstructor
 @Component
-public class ShortenHandler {
+public class CommandHandler {
     @Value("${app_props.shortener-url}") private String shortenerUrl;
     @Value("${app_props.home-url}") private String homeUrl;
 
-    private final ShortenCompletableFuture cfService;
+    private final CommandCompletableFuture cfService;
 
     public Mono<ServerResponse> id(ServerRequest request) {
         var defaultUri = URI.create(homeUrl);
@@ -39,7 +39,7 @@ public class ShortenHandler {
     }
 
     public Mono<ServerResponse> save(ServerRequest request) {
-        return request.bodyToMono(Shorten.Param.class)
+        return request.bodyToMono(CShorten.Param.class)
                 .flatMap(param -> {
                     if (!param.isValid()) {
                         return json(Map.of("to", param.url()));
@@ -51,21 +51,14 @@ public class ShortenHandler {
                 });
     }
 
-    public Mono<ServerResponse> byAll(ServerRequest request) {
-        return json(cfService.byAll());
-    }
-
     private static final URI URI_LIST_ALL = URI.create("/api/list/all");
     public Mono<ServerResponse> delete(ServerRequest request) {
         return seeOthers(cfService.delete(request.pathVariable("id")), URI_LIST_ALL);
     }
 
     public Mono<ServerResponse> bulk(ServerRequest request) {
-        return request.bodyToMono(new ParameterizedTypeReference<List<Shorten.Param>>() {})
+        return request.bodyToMono(new ParameterizedTypeReference<List<CShorten.Param>>() {})
                 .flatMap(params -> json(cfService.bulk(params)));
     }
 
-    public Mono<ServerResponse> byDuration(ServerRequest request) {
-        return json(cfService.byDuration(request.pathVariable("duration")));
-    }
 }
