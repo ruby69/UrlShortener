@@ -1,4 +1,4 @@
-package net.rubyworks.urlshortener.web;
+package net.rubyworks.urlshortener.command;
 
 import static java.util.stream.Collectors.toMap;
 
@@ -9,41 +9,41 @@ import java.util.function.Function;
 import java.util.stream.StreamSupport;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
-import net.rubyworks.urlshortener.domain.Shorten;
-import net.rubyworks.urlshortener.domain.ShortenRepository;
+import net.rubyworks.urlshortener.command.domain.CShorten;
+import net.rubyworks.urlshortener.command.domain.CShortenRepository;
 
-@Service
-public class ShortenerService {
-    private ShortenRepository shortenRepository;
+@Component
+public class CommandShortener {
+    private CShortenRepository shortenRepository;
 
-    private Map<String, Shorten> byId;
-    private Map<String, Shorten> byUrl;
+    private Map<String, CShorten> byId;
+    private Map<String, CShorten> byUrl;
 
     @Autowired
-    public void setShortenRepository(ShortenRepository shortenRepository) {
+    public void setShortenRepository(CShortenRepository shortenRepository) {
         this.shortenRepository = shortenRepository;
 
         var reserved = List.of(
-                Shorten.of("Hi", "https://test.dii.im/"),
-                Shorten.of("hi", "https://www.dii.im/")
+                CShorten.of("Hi", "https://test.dii.im/"),
+                CShorten.of("hi", "https://www.dii.im/")
                 );
 
         this.shortenRepository.saveAll(reserved);
-        byId = reserved.stream().collect(toMap(Shorten::getId, Function.identity()));
-        byUrl = reserved.stream().collect(toMap(Shorten::getUrl, Function.identity()));
+        byId = reserved.stream().collect(toMap(CShorten::getId, Function.identity()));
+        byUrl = reserved.stream().collect(toMap(CShorten::getUrl, Function.identity()));
     }
 
-    public Shorten create(String url, long count, long ttl) {
+    public CShorten create(String url, long count, long ttl) {
         return create(obtainId(), url, count, ttl);
     }
 
-    public Shorten create(String id, String url, long count, long ttl) {
+    public CShorten create(String id, String url, long count, long ttl) {
         if (byUrl.containsKey(url)) {
             return byUrl.get(url);
         }
-        return shortenRepository.save(Shorten.of(id, url, count, ttl, false));
+        return shortenRepository.save(CShorten.of(id, url, count, ttl, false));
     }
 
     private static final int LOOP_COUNT_MAX = 3;
@@ -52,7 +52,7 @@ public class ShortenerService {
         var loopCount = 0;
         while(true) {
             loopCount++;
-            var tempId = Shorten.random(countForRandom++);
+            var tempId = CShorten.random(countForRandom++);
             if (!shortenRepository.existsById(tempId)) {
                 return tempId;
             }
@@ -63,14 +63,14 @@ public class ShortenerService {
         }
     }
 
-    private Shorten find(String id) {
+    private CShorten find(String id) {
         if (byId.containsKey(id)) {
             return byId.get(id);
         }
         return shortenRepository.findById(id).orElse(null);
     }
 
-    public Shorten findAndUpdate(String id) {
+    public CShorten findAndUpdate(String id) {
         var shorten = find(id);
 
         Optional.ofNullable(shorten)
@@ -78,14 +78,14 @@ public class ShortenerService {
         .ifPresent(find -> {
             var accessCount = find.getCount();
             if (accessCount < 0) { // not used count-expiration
-                shortenRepository.save(Shorten.copy(find)); // just update modifed-time
+                shortenRepository.save(CShorten.copy(find)); // just update modifed-time
             } else {
                 accessCount--;
 
                 if (accessCount < 1) {
                     deleteBy(id);
                 } else {
-                    shortenRepository.save(Shorten.copy(find, accessCount));
+                    shortenRepository.save(CShorten.copy(find, accessCount));
                 }
             }
         });
@@ -99,13 +99,13 @@ public class ShortenerService {
         }
     }
 
-    public List<Shorten> findAll() {
+    public List<CShorten> findAll() {
         var findAll = shortenRepository.findAll();
         return StreamSupport.stream(findAll.spliterator(), true).toList();
     }
 
-    public void deleteAll(List<Shorten> list) {
-        list.stream().map(Shorten::getId)
+    public void deleteAll(List<CShorten> list) {
+        list.stream().map(CShorten::getId)
         .forEach(shortenRepository::deleteById);
     }
 
