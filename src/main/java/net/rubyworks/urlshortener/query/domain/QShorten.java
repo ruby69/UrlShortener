@@ -28,7 +28,7 @@ public class QShorten implements Serializable {
     private boolean fixed;
 
     public String getBan() {
-        return "http://localhost:8080/api/delete/" + id;
+        return "https://s.dii.im/api/delete/" + id;
     }
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
