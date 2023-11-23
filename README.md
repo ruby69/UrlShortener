@@ -5,4 +5,8 @@ This application is the backend api part of an URL shortener that reduces the le
 It is built using [Spring Boot](http://projects.spring.io/spring-boot/) and [Redis](https://redis.io/), and is packaged in Docker containers.
 
 ## Usage
-![a demo using Postman API](./doc/demo.jpg)
+- shortening
+![a demo using Postman API](./doc/demo1.jpg)
+
+- listing
+![a demo using Postman API](./doc/demo2.jpg)
