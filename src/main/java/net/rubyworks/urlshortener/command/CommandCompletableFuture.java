@@ -18,7 +18,7 @@ public class CommandCompletableFuture {
 
     public CompletableFuture<URI> id(String id) {
         var shorten = shortner.findAndUpdate(id);
-        return CompletableFuture.completedFuture(shorten.uri());
+        return CompletableFuture.completedFuture(shorten != null ? shorten.uri() : null);
     }
 
     public CompletableFuture<CShorten> save(CShorten.Param param) {
